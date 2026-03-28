@@ -1,8 +1,8 @@
 public class Node {
-    int id;;
+    int id;
     int x;
     int y;
-    boolean visited = true;
+    boolean visited = false;
 
     Node(int id, int x , int y){
         this.id = id;
