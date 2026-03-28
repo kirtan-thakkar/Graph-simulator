@@ -8,5 +8,11 @@ public class Graph {
         adjList.putIfAbsent(id, new ArrayList<>());
     }
     
+    void addEdge(int u , int v){
+        adjList.get(u).add(v);
+        if(!isDirected){
+            adjList.get(v).add(u);
+        }
+    }
 
 }
