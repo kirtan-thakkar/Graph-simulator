@@ -2,7 +2,6 @@
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.List;
-import java.util.ArrayList;
 
 public class Traversal {
 
@@ -15,15 +14,19 @@ public class Traversal {
             try {
                 boolean[] visited = new boolean[nodes.size()];
                 Queue<Integer> queue = new LinkedList<>();
-                List<Integer> order = new ArrayList<>();
+                String order = "";
 
                 queue.add(0);
                 visited[0] = true;
 
                 while (!queue.isEmpty()) {
                     int current = queue.poll();
-                    order.add(current);
-                    listener.onOrderUpdate(toOrderText(order));
+                    if (order.equals("")) {
+                        order = "" + current;
+                    } else {
+                        order = order + " -> " + current;
+                    }
+                    listener.onOrderUpdate(order);
 
                     nodes.get(current).visited = true;
                     panel.repaint();
@@ -46,7 +49,7 @@ public class Traversal {
         new Thread(() -> {
             try {
                 boolean[] visited = new boolean[nodes.size()];
-                List<Integer> order = new ArrayList<>();
+                String[] order = { "" };
                 dfsHelper(0, visited, graph, nodes, panel, listener, order);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -55,12 +58,16 @@ public class Traversal {
     }
 
     static void dfsHelper(int node, boolean[] visited, Graph graph,
-            List<Node> nodes, GraphPanel panel, OrderListener listener, List<Integer> order)
+            List<Node> nodes, GraphPanel panel, OrderListener listener, String[] order)
             throws InterruptedException {
 
         visited[node] = true;
-        order.add(node);
-        listener.onOrderUpdate(toOrderText(order));
+        if (order[0].equals("")) {
+            order[0] = "" + node;
+        } else {
+            order[0] = order[0] + " -> " + node;
+        }
+        listener.onOrderUpdate(order[0]);
         nodes.get(node).visited = true;
 
         panel.repaint();
@@ -71,21 +78,6 @@ public class Traversal {
                 dfsHelper(neighbor, visited, graph, nodes, panel, listener, order);
             }
         }
-    }
-
-    private static String toOrderText(List<Integer> order) {
-        if (order.isEmpty()) {
-            return "-";
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < order.size(); i++) {
-            sb.append(order.get(i));
-            if (i < order.size() - 1) {
-                sb.append(" -> ");
-            }
-        }
-        return sb.toString();
     }
 
 }

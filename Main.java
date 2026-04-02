@@ -54,7 +54,9 @@ public class Main extends JFrame {
         add(controls, BorderLayout.SOUTH);
 
         bfsBtn.addActionListener(e -> {
-            clearVisitedNodes();
+            for (Node n : nodes) {
+                n.visited = false;
+            }
             Traversal.bfs(graph, nodes, panel, order -> {
                 if (graph.isDirected) {
                     directedBfsOrder = order;
@@ -66,7 +68,9 @@ public class Main extends JFrame {
         });
 
         dfsBtn.addActionListener(e -> {
-            clearVisitedNodes();
+            for (Node n : nodes) {
+                n.visited = false;
+            }
             Traversal.dfs(graph, nodes, panel, order -> {
                 if (graph.isDirected) {
                     directedDfsOrder = order;
@@ -78,7 +82,9 @@ public class Main extends JFrame {
         });
 
         resetBtn.addActionListener(e -> {
-            clearVisitedNodes();
+            for (Node n : nodes) {
+                n.visited = false;
+            }
             panel.repaint();
         });
 
@@ -121,16 +127,9 @@ public class Main extends JFrame {
         }
     }
 
-    private void clearVisitedNodes() {
-        for (Node n : nodes) {
-            n.visited = false;
-        }
-    }
-
     private void updateOrderText() {
-        String currentMode = graph.isDirected ? "Directed" : "Undirected";
         orderArea.setText(
-                "Current mode: " + currentMode + "\n" +
+                "Current mode: " + (graph.isDirected ? "Directed" : "Undirected") + "\n" +
                         "Undirected BFS order: " + undirectedBfsOrder + "\n" +
                         "Undirected DFS order: " + undirectedDfsOrder + "\n" +
                         "Directed BFS order: " + directedBfsOrder + "\n" +
