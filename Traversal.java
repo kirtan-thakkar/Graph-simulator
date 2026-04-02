@@ -1,59 +1,91 @@
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.List;
+import java.util.ArrayList;
 
 public class Traversal {
 
-    static void bfs(Graph graph, java.util.List<Node> nodes, GraphPanel panel) {
+    interface OrderListener {
+        void onOrderUpdate(String orderText);
+    }
+
+    static void bfs(Graph graph, List<Node> nodes, GraphPanel panel, OrderListener listener) {
         new Thread(() -> {
             try {
-                Set<Integer> visited = new HashSet<>();
+                boolean[] visited = new boolean[nodes.size()];
                 Queue<Integer> queue = new LinkedList<>();
+                List<Integer> order = new ArrayList<>();
 
                 queue.add(0);
-                visited.add(0);
+                visited[0] = true;
 
                 while (!queue.isEmpty()) {
-                    int node = queue.poll();
+                    int current = queue.poll();
+                    order.add(current);
+                    listener.onOrderUpdate(toOrderText(order));
 
-                    nodes.get(node).visited = true;
+                    nodes.get(current).visited = true;
                     panel.repaint();
                     Thread.sleep(800);
 
-                    for (int neighbor : graph.adjList.get(node)) {
-                        if (!visited.contains(neighbor)) {
-                            visited.add(neighbor);
+                    for (int neighbor : graph.adjList.get(current)) {
+                        if (!visited[neighbor]) {
+                            visited[neighbor] = true;
                             queue.add(neighbor);
                         }
                     }
                 }
-            } catch (Exception ignored) {
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }).start();
     }
 
-    static void dfs(Graph graph, java.util.List<Node> nodes, GraphPanel panel) {
+    static void dfs(Graph graph, List<Node> nodes, GraphPanel panel, OrderListener listener) {
         new Thread(() -> {
             try {
-                dfsHelper(0, new HashSet<>(), graph, nodes, panel);
-            } catch (Exception ignored) {
+                boolean[] visited = new boolean[nodes.size()];
+                List<Integer> order = new ArrayList<>();
+                dfsHelper(0, visited, graph, nodes, panel, listener, order);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }).start();
     }
 
-    static void dfsHelper(int node, Set<Integer> visited, Graph graph,
-            java.util.List<Node> nodes, GraphPanel panel) throws InterruptedException {
+    static void dfsHelper(int node, boolean[] visited, Graph graph,
+            List<Node> nodes, GraphPanel panel, OrderListener listener, List<Integer> order)
+            throws InterruptedException {
 
-        visited.add(node);
+        visited[node] = true;
+        order.add(node);
+        listener.onOrderUpdate(toOrderText(order));
         nodes.get(node).visited = true;
 
         panel.repaint();
         Thread.sleep(800);
 
         for (int neighbor : graph.adjList.get(node)) {
-            if (!visited.contains(neighbor)) {
-                dfsHelper(neighbor, visited, graph, nodes, panel);
+            if (!visited[neighbor]) {
+                dfsHelper(neighbor, visited, graph, nodes, panel, listener, order);
             }
         }
+    }
+
+    private static String toOrderText(List<Integer> order) {
+        if (order.isEmpty()) {
+            return "-";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < order.size(); i++) {
+            sb.append(order.get(i));
+            if (i < order.size() - 1) {
+                sb.append(" -> ");
+            }
+        }
+        return sb.toString();
     }
 
 }

@@ -1,52 +1,50 @@
-
-import java.awt.*;
-import java.util.*;
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JToggleButton;
+import javax.swing.SwingUtilities;
 
 public class Main extends JFrame {
 
-    private static final Color APP_BG = new Color(10, 18, 25);
-    private static final Color CARD_BG = new Color(21, 31, 42);
-    private static final Color BTN_BG = new Color(44, 58, 73);
-    private static final Color BTN_TEXT = new Color(232, 239, 247);
-    private static final Font UI_FONT = new Font("Inter", Font.PLAIN, 14);
-
     Graph graph = new Graph();
-    java.util.List<Node> nodes = new ArrayList<>();
+    List<Node> nodes = new ArrayList<>();
     GraphPanel panel;
+    JTextArea orderArea;
+
+    String undirectedBfsOrder = "-";
+    String undirectedDfsOrder = "-";
+    String directedBfsOrder = "-";
+    String directedDfsOrder = "-";
 
     public Main() {
-        setTitle("Graph Traversal Simulator - Classic Dijkstra Graph");
-        setSize(980, 700);
-        getContentPane().setBackground(APP_BG);
+        setTitle("Graph Traversal Visualizer");
+        setSize(900, 650);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLayout(new BorderLayout(0, 12));
+        setLayout(new BorderLayout());
 
         createGraph();
 
         panel = new GraphPanel(nodes, graph);
-        panel.setBorder(new EmptyBorder(20, 20, 8, 20));
         add(panel, BorderLayout.CENTER);
 
-        JPanel controls = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 12));
-        controls.setBackground(CARD_BG);
-        controls.setBorder(new EmptyBorder(0, 0, 12, 0));
+        orderArea = new JTextArea(5, 40);
+        orderArea.setEditable(false);
+        orderArea.setFocusable(false);
+        updateOrderText();
+        add(orderArea, BorderLayout.NORTH);
+
+        JPanel controls = new JPanel();
+        controls.setLayout(new FlowLayout());
 
         JButton bfsBtn = new JButton("BFS");
         JButton dfsBtn = new JButton("DFS");
         JButton resetBtn = new JButton("Reset");
-        JToggleButton toggleBtn = new JToggleButton("Undirected Graph", false);
-
-        java.util.List<AbstractButton> buttons = Arrays.asList(bfsBtn, dfsBtn, resetBtn, toggleBtn);
-        for (AbstractButton btn : buttons) {
-            btn.setFont(UI_FONT.deriveFont(Font.BOLD, 14f));
-            btn.setBackground(BTN_BG);
-            btn.setForeground(BTN_TEXT);
-            btn.setFocusPainted(false);
-            btn.setBorder(BorderFactory.createEmptyBorder(10, 16, 10, 16));
-            btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        }
+        JToggleButton toggleBtn = new JToggleButton("Directed: OFF", false);
 
         controls.add(bfsBtn);
         controls.add(dfsBtn);
@@ -55,20 +53,40 @@ public class Main extends JFrame {
 
         add(controls, BorderLayout.SOUTH);
 
-        bfsBtn.addActionListener(e -> Traversal.bfs(graph, nodes, panel));
-        dfsBtn.addActionListener(e -> Traversal.dfs(graph, nodes, panel));
+        bfsBtn.addActionListener(e -> {
+            clearVisitedNodes();
+            Traversal.bfs(graph, nodes, panel, order -> {
+                if (graph.isDirected) {
+                    directedBfsOrder = order;
+                } else {
+                    undirectedBfsOrder = order;
+                }
+                SwingUtilities.invokeLater(this::updateOrderText);
+            });
+        });
+
+        dfsBtn.addActionListener(e -> {
+            clearVisitedNodes();
+            Traversal.dfs(graph, nodes, panel, order -> {
+                if (graph.isDirected) {
+                    directedDfsOrder = order;
+                } else {
+                    undirectedDfsOrder = order;
+                }
+                SwingUtilities.invokeLater(this::updateOrderText);
+            });
+        });
 
         resetBtn.addActionListener(e -> {
-            for (Node n : nodes) {
-                n.visited = false;
-            }
+            clearVisitedNodes();
             panel.repaint();
         });
 
         toggleBtn.addActionListener(e -> {
             graph.isDirected = toggleBtn.isSelected();
-            toggleBtn.setText(graph.isDirected ? "Directed Graph" : "Undirected Graph");
+            toggleBtn.setText(graph.isDirected ? "Directed: ON" : "Directed: OFF");
             createGraph();
+            updateOrderText();
             panel.repaint();
         });
 
@@ -80,7 +98,7 @@ public class Main extends JFrame {
         graph.clear();
         nodes.clear();
 
-        // Classic Dijkstra teaching graph (same topology and weights as shared image).
+        // Fixed graph with 5 nodes.
         nodes.add(new Node(0, 120, 250));
         nodes.add(new Node(1, 300, 120));
         nodes.add(new Node(2, 300, 380));
@@ -101,6 +119,22 @@ public class Main extends JFrame {
         for (Node n : nodes) {
             n.visited = false;
         }
+    }
+
+    private void clearVisitedNodes() {
+        for (Node n : nodes) {
+            n.visited = false;
+        }
+    }
+
+    private void updateOrderText() {
+        String currentMode = graph.isDirected ? "Directed" : "Undirected";
+        orderArea.setText(
+                "Current mode: " + currentMode + "\n" +
+                        "Undirected BFS order: " + undirectedBfsOrder + "\n" +
+                        "Undirected DFS order: " + undirectedDfsOrder + "\n" +
+                        "Directed BFS order: " + directedBfsOrder + "\n" +
+                        "Directed DFS order: " + directedDfsOrder);
     }
 
     public static void main(String[] args) {
