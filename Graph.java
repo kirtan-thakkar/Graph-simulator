@@ -4,7 +4,7 @@ import java.util.List;
 public class Graph {
 
     List<List<Integer>> adjList = new ArrayList<>();
-    int[][] edgeWeights = new int[0][0];
+    int[][] weights = new int[][];
     boolean isDirected = false;
 
     void addNode(int id) {
