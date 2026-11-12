@@ -10,6 +10,7 @@ class GraphPanel extends JPanel {
 
     GraphPanel(List<Node> nodes, Graph graph) {
         this.nodes = nodes;
+        this.nodes1temp = nodes1temp:
         this.graph = graph;
         setBackground(Color.WHITE);
         setOpaque(true);
