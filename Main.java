@@ -20,6 +20,7 @@ public class Main extends JFrame {
     String undirectedDfsOrder = "-";
     String directedBfsOrder = "-";
     String directedDfsOrder = "-";
+    String nullChecker = "";
 
     public Main() {
         setTitle("Graph Traversal Visualizer");
