@@ -2,11 +2,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Graph {
-
     List<List<Integer>> adjList = new ArrayList<>();
     int[][] weights = new int[][];
     boolean isDirected = false;
 
+    //add node fn
     void addNode(int id) {
         while (adjList.size() <= id) {
             adjList.add(new ArrayList<>());
@@ -14,6 +14,7 @@ public class Graph {
         ensureWeightMatrixSize(adjList.size());
     }
 
+    //add edge fun
     void addEdge(int u, int v, int weight) {
         adjList.get(u).add(v);
         edgeWeights[u][v] = weight;
